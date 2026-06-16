@@ -16,7 +16,7 @@ function cn(...classes: (string | undefined)[]) {
 }
 
 export const ToolCompensationPage = () => {
-  const { compensations, tools, addCompensation } = useAppStore();
+  const { compensations, tools, addCompensation, updateCompensation } = useAppStore();
   const [searchText, setSearchText] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingComp, setEditingComp] = useState<ToolCompensation | null>(null);
@@ -68,7 +68,7 @@ export const ToolCompensationPage = () => {
   const handleSave = () => {
     if (!formData.toolId || !formData.offsetNo) return;
 
-    const newComp: ToolCompensation = {
+    const compData: ToolCompensation = {
       id: editingComp?.id || `comp${Date.now()}`,
       toolId: formData.toolId,
       offsetNo: formData.offsetNo,
@@ -79,7 +79,11 @@ export const ToolCompensationPage = () => {
       operator: formData.operator || '系统',
     };
 
-    addCompensation(newComp);
+    if (editingComp) {
+      updateCompensation(compData);
+    } else {
+      addCompensation(compData);
+    }
     setShowModal(false);
   };
 

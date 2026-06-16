@@ -15,6 +15,7 @@ import type {
   CycleTimeStat,
   DashboardStats,
   AlertItem,
+  ToolReceiveRecord,
 } from '@/types';
 import {
   mockProcesses,
@@ -32,6 +33,7 @@ import {
   mockCycleTimeStats,
   mockDashboardStats,
   mockAlerts,
+  mockReceiveRecords,
 } from '@/mock/data';
 
 interface AppState {
@@ -50,6 +52,7 @@ interface AppState {
   cycleTimeStats: CycleTimeStat[];
   dashboardStats: DashboardStats;
   alerts: AlertItem[];
+  receiveRecords: ToolReceiveRecord[];
   sidebarCollapsed: boolean;
   selectedTaskId: string | null;
   selectedToolId: string | null;
@@ -60,9 +63,12 @@ interface AppState {
   markAlertRead: (id: string) => void;
   addTask: (task: ScheduleTask) => void;
   updateTask: (task: ScheduleTask) => void;
+  updateProgram: (program: NCProgram) => void;
   addTool: (tool: Tool) => void;
   updateTool: (tool: Tool) => void;
   addCompensation: (comp: ToolCompensation) => void;
+  updateCompensation: (comp: ToolCompensation) => void;
+  addReceiveRecord: (record: ToolReceiveRecord) => void;
   addWearRecord: (record: ToolWearRecord) => void;
   addRepair: (repair: ToolRepair) => void;
   addSetupRecord: (record: SetupRecord) => void;
@@ -88,6 +94,7 @@ export const useAppStore = create<AppState>((set) => ({
   cycleTimeStats: mockCycleTimeStats,
   dashboardStats: mockDashboardStats,
   alerts: mockAlerts,
+  receiveRecords: mockReceiveRecords,
   sidebarCollapsed: false,
   selectedTaskId: null,
   selectedToolId: null,
@@ -107,6 +114,11 @@ export const useAppStore = create<AppState>((set) => ({
       tasks: state.tasks.map((t) => (t.id === task.id ? task : t)),
     })),
 
+  updateProgram: (program) =>
+    set((state) => ({
+      programs: state.programs.map((p) => (p.id === program.id ? program : p)),
+    })),
+
   addTool: (tool) => set((state) => ({ tools: [...state.tools, tool] })),
   updateTool: (tool) =>
     set((state) => ({
@@ -115,6 +127,14 @@ export const useAppStore = create<AppState>((set) => ({
 
   addCompensation: (comp) =>
     set((state) => ({ compensations: [...state.compensations, comp] })),
+
+  updateCompensation: (comp) =>
+    set((state) => ({
+      compensations: state.compensations.map((c) => (c.id === comp.id ? comp : c)),
+    })),
+
+  addReceiveRecord: (record) =>
+    set((state) => ({ receiveRecords: [...state.receiveRecords, record] })),
 
   addWearRecord: (record) =>
     set((state) => ({ wearRecords: [...state.wearRecords, record] })),

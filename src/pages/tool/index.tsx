@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, Wrench, Package, AlertTriangle, Edit, Trash2, HandMetal } from 'lucide-react';
+import { Plus, Search, Wrench, Package, AlertTriangle, Edit, Trash2, HandMetal, PlayCircle, List, ClipboardList } from 'lucide-react';
 import { useAppStore } from '@/store';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -10,15 +10,17 @@ import { Modal } from '@/components/ui/Modal';
 import { Select } from '@/components/ui/Select';
 import { formatNumber, getToolTypeText } from '@/utils/format';
 import type { TableColumn } from '@/components/ui/Table';
-import type { Tool } from '@/types';
+import type { Tool, ToolReceiveRecord } from '@/types';
 
 export const ToolList = () => {
-  const { tools, updateTool, addCompensation } = useAppStore();
+  const { tools, machines, receiveRecords, updateTool, addReceiveRecord } = useAppStore();
   const [searchText, setSearchText] = useState('');
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
   const [showReceive, setShowReceive] = useState(false);
   const [receiveQty, setReceiveQty] = useState(1);
   const [receiveOperator, setReceiveOperator] = useState('');
+  const [receiveMachineId, setReceiveMachineId] = useState('');
+  const [activeTab, setActiveTab] = useState<'tools' | 'records'>('tools');
 
   const filteredTools = tools.filter(
     (t) =>
@@ -29,13 +31,38 @@ export const ToolList = () => {
 
   const handleReceive = () => {
     if (selectedTool) {
+      if (selectedTool.stock < receiveQty) {
+        alert('库存不足，无法领用');
+        return;
+      }
+      if (!receiveOperator.trim()) {
+        alert('请输入领用人');
+        return;
+      }
+      if (!receiveMachineId) {
+        alert('请选择使用机床');
+        return;
+      }
+
+      addReceiveRecord({
+        id: `rec_${Date.now()}`,
+        toolId: selectedTool.id,
+        tool: selectedTool,
+        machineId: receiveMachineId,
+        machine: machines.find((m) => m.id === receiveMachineId),
+        operator: receiveOperator,
+        quantity: receiveQty,
+        receiveTime: new Date().toISOString(),
+      });
+
       updateTool({
         ...selectedTool,
-        stock: selectedTool.stock + receiveQty,
+        stock: selectedTool.stock - receiveQty,
       });
       setShowReceive(false);
       setReceiveQty(1);
       setReceiveOperator('');
+      setReceiveMachineId('');
     }
   };
 
@@ -43,7 +70,7 @@ export const ToolList = () => {
     return Math.min(100, (tool.usedLife / tool.totalLife) * 100);
   };
 
-  const columns: TableColumn<Tool>[] = [
+  const toolColumns: TableColumn<Tool>[] = [
     { key: 'toolNo', title: '刀具编号', width: 140 },
     { key: 'toolName', title: '刀具名称', width: 120 },
     {
@@ -144,6 +171,41 @@ export const ToolList = () => {
     },
   ];
 
+  const recordColumns: TableColumn<ToolReceiveRecord>[] = [
+    {
+      key: 'toolNo',
+      title: '刀具编号',
+      width: 140,
+      render: (record) => record.tool?.toolNo || '-',
+    },
+    {
+      key: 'toolName',
+      title: '刀具名称',
+      width: 120,
+      render: (record) => record.tool?.toolName || '-',
+    },
+    { key: 'operator', title: '领用人', width: 100 },
+    {
+      key: 'machineName',
+      title: '使用机床',
+      width: 180,
+      render: (record) =>
+        record.machine ? `${record.machine.machineNo} ${record.machine.machineName}` : '-',
+    },
+    { key: 'quantity', title: '领用数量', width: 100 },
+    {
+      key: 'receiveTime',
+      title: '领用时间',
+      width: 180,
+      render: (record) => new Date(record.receiveTime).toLocaleString('zh-CN'),
+    },
+  ];
+
+  const machineOptions = machines.map((m) => ({
+    value: m.id,
+    label: `${m.machineNo} ${m.machineName}`,
+  }));
+
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
@@ -163,6 +225,27 @@ export const ToolList = () => {
         </div>
       </div>
 
+      <div className="flex gap-1 p-1 bg-industrial-50 rounded-lg w-fit">
+        <Button
+          variant={activeTab === 'tools' ? 'secondary' : 'ghost'}
+          size="sm"
+          onClick={() => setActiveTab('tools')}
+          className={activeTab === 'tools' ? 'bg-white shadow-sm' : ''}
+        >
+          <List className="w-4 h-4 mr-1" />
+          刀具列表
+        </Button>
+        <Button
+          variant={activeTab === 'records' ? 'secondary' : 'ghost'}
+          size="sm"
+          onClick={() => setActiveTab('records')}
+          className={activeTab === 'records' ? 'bg-white shadow-sm' : ''}
+        >
+          <ClipboardList className="w-4 h-4 mr-1" />
+          领用记录
+        </Button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <StatCardMini
           title="总刀具数"
@@ -172,7 +255,7 @@ export const ToolList = () => {
         <StatCardMini
           title="使用中"
           value={tools.filter((t) => t.status === 'in_use').length}
-          icon={<Play className="w-5 h-5" />}
+          icon={<PlayCircle className="w-5 h-5" />}
           color="text-primary-600"
         />
         <StatCardMini
@@ -189,28 +272,34 @@ export const ToolList = () => {
         />
       </div>
 
-      <Card>
-        <div className="flex items-center gap-4 mb-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-industrial-400" />
-            <Input
-              placeholder="搜索刀具编号、名称、品牌..."
-              className="pl-9"
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-            />
+      {activeTab === 'tools' ? (
+        <Card>
+          <div className="flex items-center gap-4 mb-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-industrial-400" />
+              <Input
+                placeholder="搜索刀具编号、名称、品牌..."
+                className="pl-9"
+                value={searchText}
+                onChange={(v) => setSearchText(v)}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="secondary" size="sm">全部</Button>
+              <Button variant="ghost" size="sm">可用</Button>
+              <Button variant="ghost" size="sm">使用中</Button>
+              <Button variant="ghost" size="sm">磨损</Button>
+              <Button variant="ghost" size="sm">损坏</Button>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="secondary" size="sm">全部</Button>
-            <Button variant="ghost" size="sm">可用</Button>
-            <Button variant="ghost" size="sm">使用中</Button>
-            <Button variant="ghost" size="sm">磨损</Button>
-            <Button variant="ghost" size="sm">损坏</Button>
-          </div>
-        </div>
 
-        <Table columns={columns} data={filteredTools} rowKey="id" />
-      </Card>
+          <Table columns={toolColumns} data={filteredTools} rowKey="id" />
+        </Card>
+      ) : (
+        <Card>
+          <Table columns={recordColumns} data={receiveRecords} rowKey="id" />
+        </Card>
+      )}
 
       <Modal
         open={showReceive}
@@ -260,23 +349,19 @@ export const ToolList = () => {
                 type="number"
                 min="1"
                 value={receiveQty}
-                onChange={(e) => setReceiveQty(parseInt(e.target.value) || 1)}
+                onChange={(v) => setReceiveQty(parseInt(v) || 1)}
               />
               <Input
                 label="领用人"
                 value={receiveOperator}
-                onChange={(e) => setReceiveOperator(e.target.value)}
+                onChange={(v) => setReceiveOperator(v)}
                 placeholder="请输入领用人姓名"
               />
               <Select
                 label="使用机床"
-                value=""
-                onChange={() => {}}
-                options={[
-                  { value: 'm001', label: 'VMC-001 立式加工中心1#' },
-                  { value: 'm002', label: 'VMC-002 立式加工中心2#' },
-                  { value: 'm004', label: 'CK-001 数控车床1#' },
-                ]}
+                value={receiveMachineId}
+                onChange={(v) => setReceiveMachineId(v)}
+                options={machineOptions}
               />
             </div>
           </div>
@@ -285,12 +370,6 @@ export const ToolList = () => {
     </div>
   );
 };
-
-function Play(props: { className?: string }) {
-  return <PlayCircle {...props} />;
-}
-
-import { PlayCircle } from 'lucide-react';
 
 function StatCardMini({
   title,

@@ -234,3 +234,14 @@ export interface AlertItem {
   time: string;
   read: boolean;
 }
+
+export interface ToolReceiveRecord {
+  id: string;
+  toolId: string;
+  tool?: Tool;
+  machineId: string;
+  machine?: Machine;
+  operator: string;
+  quantity: number;
+  receiveTime: string;
+}

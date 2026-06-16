@@ -14,6 +14,7 @@ import type {
   CycleTimeStat,
   DashboardStats,
   AlertItem,
+  ToolReceiveRecord,
 } from '@/types';
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -1078,5 +1079,32 @@ export const mockAlerts: AlertItem[] = [
     message: 'EM-20-001 发生断刀，已提交报修单',
     time: '昨天14:30',
     read: true,
+  },
+];
+
+export const mockReceiveRecords: ToolReceiveRecord[] = [
+  {
+    id: 'recv001',
+    toolId: 't001',
+    machineId: 'm001',
+    operator: '张师傅',
+    quantity: 2,
+    receiveTime: '2024-06-15 08:30:00',
+  },
+  {
+    id: 'recv002',
+    toolId: 't005',
+    machineId: 'm002',
+    operator: '李师傅',
+    quantity: 1,
+    receiveTime: '2024-06-15 09:15:00',
+  },
+  {
+    id: 'recv003',
+    toolId: 't010',
+    machineId: 'm004',
+    operator: '王师傅',
+    quantity: 1,
+    receiveTime: '2024-06-14 14:00:00',
   },
 ];

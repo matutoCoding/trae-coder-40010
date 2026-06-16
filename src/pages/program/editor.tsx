@@ -22,7 +22,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 export const ProgramEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { programs, processes, updateTask } = useAppStore();
+  const { programs, processes, updateProgram } = useAppStore();
   const program = programs.find((p) => p.id === id);
 
   const [code, setCode] = useState('');
@@ -38,6 +38,27 @@ export const ProgramEditor = () => {
       setMachineType(program.machineType);
     }
   }, [program]);
+
+  const handleSave = () => {
+    if (!program) return;
+    updateProgram({
+      ...program,
+      programName,
+      processId,
+      machineType,
+      content: code,
+      updateTime: new Date().toISOString().replace('T', ' ').substring(0, 19),
+    });
+  };
+
+  const handleRelease = () => {
+    if (!program) return;
+    updateProgram({
+      ...program,
+      status: 'released',
+      updateTime: new Date().toISOString().replace('T', ' ').substring(0, 19),
+    });
+  };
 
   if (!program) {
     return (
@@ -82,12 +103,12 @@ export const ProgramEditor = () => {
             <Download className="w-4 h-4" />
             下载
           </Button>
-          <Button>
+          <Button onClick={handleSave}>
             <Save className="w-4 h-4" />
             保存
           </Button>
           {program.status !== 'released' && (
-            <Button variant="secondary">
+            <Button variant="secondary" onClick={handleRelease}>
               <CheckCircle2 className="w-4 h-4" />
               发布
             </Button>
@@ -102,7 +123,7 @@ export const ProgramEditor = () => {
               <Input
                 label="程序名称"
                 value={programName}
-                onChange={(e) => setProgramName(e.target.value)}
+                onChange={(v) => setProgramName(v)}
               />
               <Select
                 label="所属工艺"
@@ -113,7 +134,7 @@ export const ProgramEditor = () => {
               <Input
                 label="适用机床"
                 value={machineType}
-                onChange={(e) => setMachineType(e.target.value)}
+                onChange={(v) => setMachineType(v)}
               />
               <div className="p-3 bg-industrial-50 rounded-industrial">
                 <p className="text-xs text-industrial-400">版本</p>

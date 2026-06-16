@@ -17,7 +17,7 @@ function cn(...classes: (string | undefined)[]) {
 }
 
 export const DeburrRecords = () => {
-  const { deburrRecords, tasks, addDeburrRecord } = useAppStore();
+  const { deburrRecords, tasks, processes, addDeburrRecord } = useAppStore();
   const [searchText, setSearchText] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [viewDetail, setViewDetail] = useState<DeburrRecord | null>(null);
@@ -32,6 +32,19 @@ export const DeburrRecords = () => {
   });
 
   const getTaskInfo = (id: string) => tasks.find((t) => t.id === id);
+  const getProcessInfo = (id: string) => processes.find((p) => p.id === id);
+  const getPartNameByTask = (taskId: string) => {
+    const task = getTaskInfo(taskId);
+    if (!task) return '-';
+    const process = getProcessInfo(task.processId);
+    return process ? process.partName : '-';
+  };
+  const getPartNoByTask = (taskId: string) => {
+    const task = getTaskInfo(taskId);
+    if (!task) return '-';
+    const process = getProcessInfo(task.processId);
+    return process ? process.partNo : '-';
+  };
 
   const filteredRecords = deburrRecords.filter((r) => {
     const task = getTaskInfo(r.taskId);
@@ -79,11 +92,16 @@ export const DeburrRecords = () => {
     {
       key: 'partName',
       title: '零件名称',
-      width: 140,
+      width: 160,
       render: (record) => {
-        const task = getTaskInfo(record.taskId);
-        const process = task?.processId ? tasks.find((t) => t.id === task.id)?.processId : null;
-        return '-';
+        const partName = getPartNameByTask(record.taskId);
+        const partNo = getPartNoByTask(record.taskId);
+        return (
+          <div>
+            <p className="font-medium text-industrial-600">{partName}</p>
+            <p className="text-xs text-industrial-400 font-mono">{partNo}</p>
+          </div>
+        );
       },
     },
     {
@@ -270,6 +288,17 @@ export const DeburrRecords = () => {
                 })),
             ]}
           />
+          {formData.taskId && (
+            <div className="p-3 bg-primary-50 rounded-industrial">
+              <p className="text-xs text-industrial-400">对应零件</p>
+              <p className="font-medium text-primary-700 mt-1">
+                {getPartNameByTask(formData.taskId)}
+                <span className="ml-2 text-xs text-industrial-500 font-mono">
+                  ({getPartNoByTask(formData.taskId)})
+                </span>
+              </p>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <Input
               label="操作人员"
@@ -338,16 +367,25 @@ export const DeburrRecords = () => {
                   {getTaskInfo(viewDetail.taskId)?.taskNo || '-'}
                 </p>
               </div>
+              <div className="p-3 bg-primary-50 rounded-industrial">
+                <p className="text-xs text-industrial-400">零件名称</p>
+                <p className="font-medium mt-1 text-primary-700">
+                  {getPartNameByTask(viewDetail.taskId)}
+                </p>
+                <p className="text-xs font-mono text-industrial-400">
+                  {getPartNoByTask(viewDetail.taskId)}
+                </p>
+              </div>
               <div className="p-3 bg-industrial-50 rounded-industrial">
                 <p className="text-xs text-industrial-400">操作人员</p>
                 <p className="font-medium mt-1">{viewDetail.operator}</p>
               </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
               <div className="p-3 bg-industrial-50 rounded-industrial">
                 <p className="text-xs text-industrial-400">数量</p>
                 <p className="font-mono font-medium mt-1">{viewDetail.quantity} 件</p>
               </div>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
               <div className="p-3 bg-industrial-50 rounded-industrial">
                 <p className="text-xs text-industrial-400">开始时间</p>
                 <p className="text-sm mt-1">{viewDetail.startTime}</p>
@@ -356,14 +394,14 @@ export const DeburrRecords = () => {
                 <p className="text-xs text-industrial-400">结束时间</p>
                 <p className="text-sm mt-1">{viewDetail.endTime}</p>
               </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
               <div className="p-3 bg-industrial-50 rounded-industrial">
                 <p className="text-xs text-industrial-400">用时</p>
                 <p className="font-mono font-medium mt-1">
                   {getDuration(viewDetail.startTime, viewDetail.endTime)} 分钟
                 </p>
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
               <div className="p-3 bg-industrial-50 rounded-industrial">
                 <p className="text-xs text-industrial-400">质量检查</p>
                 <div className="mt-1">
