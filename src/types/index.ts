@@ -245,3 +245,17 @@ export interface ToolReceiveRecord {
   quantity: number;
   receiveTime: string;
 }
+
+export type ToolTransactionType = 'in' | 'out' | 'scrap';
+
+export interface ToolTransaction {
+  id: string;
+  toolId: string;
+  tool?: Tool;
+  type: ToolTransactionType;
+  quantity: number;
+  operator: string;
+  timestamp: string;
+  remark?: string;
+  relatedRecordId?: string;
+}

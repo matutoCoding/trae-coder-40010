@@ -15,6 +15,8 @@ import type {
   DashboardStats,
   AlertItem,
   ToolReceiveRecord,
+  ToolTransaction,
+  ToolTransactionType,
 } from '@/types';
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -1106,5 +1108,74 @@ export const mockReceiveRecords: ToolReceiveRecord[] = [
     operator: '王师傅',
     quantity: 1,
     receiveTime: '2024-06-14 14:00:00',
+  },
+];
+
+export const mockTransactions: ToolTransaction[] = [
+  {
+    id: 'trans001',
+    toolId: 't001',
+    type: 'in',
+    quantity: 10,
+    operator: '仓库管理员',
+    timestamp: '2024-06-10 09:00:00',
+    remark: '期初入库',
+  },
+  {
+    id: 'trans002',
+    toolId: 't001',
+    type: 'out',
+    quantity: 2,
+    operator: '张师傅',
+    timestamp: '2024-06-15 08:30:00',
+    remark: 'VMC-001领用',
+    relatedRecordId: 'recv001',
+  },
+  {
+    id: 'trans003',
+    toolId: 't005',
+    type: 'out',
+    quantity: 1,
+    operator: '李师傅',
+    timestamp: '2024-06-15 09:15:00',
+    remark: 'VMC-002领用',
+    relatedRecordId: 'recv002',
+  },
+  {
+    id: 'trans004',
+    toolId: 't001',
+    type: 'in',
+    quantity: 5,
+    operator: '仓库管理员',
+    timestamp: '2024-06-14 10:00:00',
+    remark: '采购入库',
+  },
+  {
+    id: 'trans005',
+    toolId: 't010',
+    type: 'out',
+    quantity: 1,
+    operator: '王师傅',
+    timestamp: '2024-06-14 14:00:00',
+    remark: 'CK-001领用',
+    relatedRecordId: 'recv003',
+  },
+  {
+    id: 'trans006',
+    toolId: 't008',
+    type: 'scrap',
+    quantity: 1,
+    operator: '质量员',
+    timestamp: '2024-06-13 16:30:00',
+    remark: '刀具磨损严重报废',
+  },
+  {
+    id: 'trans007',
+    toolId: 't003',
+    type: 'in',
+    quantity: 8,
+    operator: '仓库管理员',
+    timestamp: '2024-06-12 09:30:00',
+    remark: '新采购入库',
   },
 ];

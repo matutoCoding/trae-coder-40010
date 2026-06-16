@@ -16,6 +16,7 @@ import type {
   DashboardStats,
   AlertItem,
   ToolReceiveRecord,
+  ToolTransaction,
 } from '@/types';
 import {
   mockProcesses,
@@ -34,6 +35,7 @@ import {
   mockDashboardStats,
   mockAlerts,
   mockReceiveRecords,
+  mockTransactions,
 } from '@/mock/data';
 
 interface AppState {
@@ -53,6 +55,7 @@ interface AppState {
   dashboardStats: DashboardStats;
   alerts: AlertItem[];
   receiveRecords: ToolReceiveRecord[];
+  transactions: ToolTransaction[];
   sidebarCollapsed: boolean;
   selectedTaskId: string | null;
   selectedToolId: string | null;
@@ -76,6 +79,7 @@ interface AppState {
   addDeburrRecord: (record: DeburrRecord) => void;
   updateRepair: (repair: ToolRepair) => void;
   updateWearRecord: (record: ToolWearRecord) => void;
+  addTransaction: (trans: ToolTransaction) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -95,6 +99,7 @@ export const useAppStore = create<AppState>((set) => ({
   dashboardStats: mockDashboardStats,
   alerts: mockAlerts,
   receiveRecords: mockReceiveRecords,
+  transactions: mockTransactions,
   sidebarCollapsed: false,
   selectedTaskId: null,
   selectedToolId: null,
@@ -160,4 +165,7 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({
       wearRecords: state.wearRecords.map((r) => (r.id === record.id ? record : r)),
     })),
+
+  addTransaction: (trans) =>
+    set((state) => ({ transactions: [...state.transactions, trans] })),
 }));
