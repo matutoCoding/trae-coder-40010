@@ -239,6 +239,8 @@ export interface ToolReceiveRecord {
   id: string;
   toolId: string;
   tool?: Tool;
+  taskId?: string;
+  task?: ScheduleTask;
   machineId: string;
   machine?: Machine;
   operator: string;
@@ -252,6 +254,10 @@ export interface ToolTransaction {
   id: string;
   toolId: string;
   tool?: Tool;
+  taskId?: string;
+  task?: ScheduleTask;
+  machineId?: string;
+  machine?: Machine;
   type: ToolTransactionType;
   quantity: number;
   operator: string;

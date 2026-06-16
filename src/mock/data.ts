@@ -1088,6 +1088,7 @@ export const mockReceiveRecords: ToolReceiveRecord[] = [
   {
     id: 'recv001',
     toolId: 't001',
+    taskId: 'task001',
     machineId: 'm001',
     operator: '张师傅',
     quantity: 2,
@@ -1096,6 +1097,7 @@ export const mockReceiveRecords: ToolReceiveRecord[] = [
   {
     id: 'recv002',
     toolId: 't005',
+    taskId: 'task002',
     machineId: 'm002',
     operator: '李师傅',
     quantity: 1,
@@ -1104,6 +1106,7 @@ export const mockReceiveRecords: ToolReceiveRecord[] = [
   {
     id: 'recv003',
     toolId: 't010',
+    taskId: 'task007',
     machineId: 'm004',
     operator: '王师傅',
     quantity: 1,
@@ -1124,6 +1127,8 @@ export const mockTransactions: ToolTransaction[] = [
   {
     id: 'trans002',
     toolId: 't001',
+    taskId: 'task001',
+    machineId: 'm001',
     type: 'out',
     quantity: 2,
     operator: '张师傅',
@@ -1134,6 +1139,8 @@ export const mockTransactions: ToolTransaction[] = [
   {
     id: 'trans003',
     toolId: 't005',
+    taskId: 'task002',
+    machineId: 'm002',
     type: 'out',
     quantity: 1,
     operator: '李师傅',
@@ -1153,6 +1160,8 @@ export const mockTransactions: ToolTransaction[] = [
   {
     id: 'trans005',
     toolId: 't010',
+    taskId: 'task007',
+    machineId: 'm004',
     type: 'out',
     quantity: 1,
     operator: '王师傅',

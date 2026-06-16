@@ -9,6 +9,7 @@ import {
   Gauge,
   PlayCircle,
   Clock,
+  Package,
 } from 'lucide-react';
 import { useAppStore } from '@/store';
 import { StatCard } from '@/components/ui/StatCard';
@@ -63,7 +64,9 @@ const statusData = [
 ];
 
 export const Dashboard = () => {
-  const { dashboardStats, machines, tasks, alerts } = useAppStore();
+  const { dashboardStats, machines, tasks, alerts, tools } = useAppStore();
+
+  const lowStockTools = tools.filter((t) => t.stock <= t.minStock);
 
   const machineColumns: TableColumn<typeof machines[0]>[] = [
     { key: 'machineNo', title: '设备编号', width: 120 },
@@ -187,9 +190,9 @@ export const Dashboard = () => {
           valueClassName="text-primary-600"
         />
         <StatCard
-          title="刀具告警"
-          value={dashboardStats.toolAlerts}
-          icon={<AlertTriangle className="w-6 h-6" />}
+          title="库存预警"
+          value={lowStockTools.length}
+          icon={<Package className="w-6 h-6" />}
           valueClassName="text-danger-600"
         />
       </div>
@@ -293,6 +296,38 @@ export const Dashboard = () => {
                 </div>
               </div>
             ))}
+
+            {lowStockTools.length > 0 && (
+              <>
+                <div className="border-t border-industrial-100 my-2 pt-2">
+                  <p className="text-xs font-medium text-industrial-500 mb-2">库存预警</p>
+                </div>
+                {lowStockTools.slice(0, 3).map((tool) => (
+                  <div
+                    key={tool.id}
+                    className="p-3 rounded-industrial border border-industrial-100 hover:border-danger-200 transition-colors cursor-pointer bg-danger-50/30 border-danger-100"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-danger-50 text-danger-500">
+                        <Package className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-industrial-600">
+                            {tool.toolName}
+                          </span>
+                          <span className="text-xs text-industrial-400">{tool.toolNo}</span>
+                        </div>
+                        <p className="text-xs text-danger-600 mt-0.5 font-medium">
+                          当前库存: {tool.stock} / 最小库存: {tool.minStock}
+                        </p>
+                        <span className="text-xs text-industrial-300 mt-1 block">库存不足，请及时补充</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         </Card>
       </div>
